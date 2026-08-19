@@ -43,9 +43,11 @@ public class Notification {
     }
 
     public UUID getCustomerId() { return customerId; }
+    public UUID getId() { return id; }
     public UUID getOrderId() { return orderId; }
     public NotificationType getType() { return type; }
     public String getMessage() { return message; }
     public boolean isRead() { return read; }
     public Instant getCreatedAt() { return createdAt; }
+    public void markRead() { this.read = true; }
 }

@@ -2,6 +2,7 @@ package com.example.notificationservice.notification;
 
 import org.springframework.stereotype.Service;
 import java.util.UUID;
+import java.util.List;
 
 @Service
 public class NotificationService {
@@ -15,5 +16,12 @@ public class NotificationService {
         orders.findById(orderId).ifPresent(order -> notifications.save(type == NotificationType.PAYMENT_SUCCEEDED
                 ? Notification.paymentSucceeded(order.getCustomerId(), orderId)
                 : Notification.paymentFailed(order.getCustomerId(), orderId)));
+    }
+    public List<Notification> listForCustomer(UUID customerId) { return notifications.findByCustomerIdOrderByCreatedAtDesc(customerId); }
+    public Notification markRead(UUID customerId, UUID notificationId) {
+        Notification notification = notifications.findById(notificationId).orElseThrow(NotificationNotFoundException::new);
+        if (!notification.getCustomerId().equals(customerId)) throw new NotificationNotFoundException();
+        notification.markRead();
+        return notifications.save(notification);
     }
 }
