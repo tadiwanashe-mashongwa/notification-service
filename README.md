@@ -118,6 +118,12 @@ mvn test
 
 The suite covers domain rules, service idempotency and ownership, controller contracts, Flyway/JPA persistence, direct Kafka listener handling, and end-to-end Kafka/PostgreSQL Testcontainers integration. The JaCoCo HTML report is generated at `target/site/jacoco/index.html`.
 
+## API screenshot
+
+Swagger UI from the running notification service:
+
+![SpareLink Notification Service Swagger UI](docs/images/swagger-ui.png)
+
 ## Project structure
 
 ```text
