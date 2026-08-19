@@ -66,4 +66,25 @@ class NotificationServiceTest {
 
         assertThat(service.listUnreadForCustomer(customerId)).hasSize(1);
     }
+
+    @Test
+    void retainsPaymentEventUntilOrderContextArrives() {
+        UUID orderId = UUID.randomUUID();
+        UUID customerId = UUID.randomUUID();
+        NotificationRepository notifications = mock(NotificationRepository.class);
+        NotificationOrderRepository orders = mock(NotificationOrderRepository.class);
+        PendingPaymentNotificationRepository pending = mock(PendingPaymentNotificationRepository.class);
+        when(orders.findById(orderId)).thenReturn(Optional.empty(), Optional.of(NotificationOrder.create(orderId, customerId)));
+        PendingPaymentNotification delayed = PendingPaymentNotification.create(orderId, NotificationType.PAYMENT_SUCCEEDED);
+        when(pending.findByOrderId(orderId)).thenReturn(List.of(delayed));
+        when(notifications.existsByOrderIdAndType(orderId, NotificationType.PAYMENT_SUCCEEDED)).thenReturn(false);
+        NotificationService service = new NotificationService(notifications, orders, pending);
+
+        service.handlePaymentStatusChanged(orderId, "SUCCESS");
+        service.recordOrderContext(orderId, customerId);
+
+        verify(pending).save(any(PendingPaymentNotification.class));
+        verify(notifications).save(any(Notification.class));
+        verify(pending).delete(delayed);
+    }
 }
