@@ -37,6 +37,11 @@ public class Notification {
                 "Payment received for order " + orderId);
     }
 
+    public static Notification paymentFailed(UUID customerId, UUID orderId) {
+        return new Notification(customerId, orderId, NotificationType.PAYMENT_FAILED,
+                "Payment failed for order " + orderId);
+    }
+
     public UUID getCustomerId() { return customerId; }
     public UUID getOrderId() { return orderId; }
     public NotificationType getType() { return type; }
