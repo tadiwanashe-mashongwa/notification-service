@@ -5,6 +5,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,5 +26,17 @@ class NotificationControllerTest {
 
         assertThat(response.read()).isTrue();
         verify(service).markRead(customerId, notification.getId());
+    }
+
+    @Test
+    void listsUnreadNotificationsForAuthenticatedCustomer() {
+        UUID customerId = UUID.randomUUID();
+        NotificationService service = mock(NotificationService.class);
+        when(service.listUnreadForCustomer(customerId)).thenReturn(List.of(Notification.paymentSucceeded(customerId, UUID.randomUUID())));
+        NotificationController controller = new NotificationController(service);
+        Jwt jwt = new Jwt("token", Instant.now(), Instant.now().plusSeconds(60), Map.of("alg", "none"), Map.of("sub", customerId.toString()));
+
+        assertThat(controller.listUnreadMine(jwt)).hasSize(1);
+        verify(service).listUnreadForCustomer(customerId);
     }
 }

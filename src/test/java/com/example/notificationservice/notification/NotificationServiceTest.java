@@ -3,6 +3,7 @@ package com.example.notificationservice.notification;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,5 +53,17 @@ class NotificationServiceTest {
 
         assertThatThrownBy(() -> service.markRead(UUID.randomUUID(), notification.getId()))
                 .isInstanceOf(NotificationNotFoundException.class);
+    }
+
+    @Test
+    void listsOnlyUnreadNotificationsForCustomer() {
+        UUID customerId = UUID.randomUUID();
+        NotificationRepository notifications = mock(NotificationRepository.class);
+        NotificationOrderRepository orders = mock(NotificationOrderRepository.class);
+        when(notifications.findByCustomerIdAndReadFalseOrderByCreatedAtDesc(customerId))
+                .thenReturn(List.of(Notification.paymentSucceeded(customerId, UUID.randomUUID())));
+        NotificationService service = new NotificationService(notifications, orders);
+
+        assertThat(service.listUnreadForCustomer(customerId)).hasSize(1);
     }
 }

@@ -15,6 +15,9 @@ public class NotificationController {
     @GetMapping public List<NotificationResponse> listMine(@AuthenticationPrincipal Jwt jwt) {
         return service.listForCustomer(UUID.fromString(jwt.getSubject())).stream().map(NotificationResponse::from).toList();
     }
+    @GetMapping("/unread") public List<NotificationResponse> listUnreadMine(@AuthenticationPrincipal Jwt jwt) {
+        return service.listUnreadForCustomer(UUID.fromString(jwt.getSubject())).stream().map(NotificationResponse::from).toList();
+    }
     @PatchMapping("/{notificationId}/read") public NotificationResponse markRead(@PathVariable UUID notificationId, @AuthenticationPrincipal Jwt jwt) {
         return NotificationResponse.from(service.markRead(UUID.fromString(jwt.getSubject()), notificationId));
     }

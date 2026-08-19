@@ -18,6 +18,7 @@ public class NotificationService {
                 : Notification.paymentFailed(order.getCustomerId(), orderId)));
     }
     public List<Notification> listForCustomer(UUID customerId) { return notifications.findByCustomerIdOrderByCreatedAtDesc(customerId); }
+    public List<Notification> listUnreadForCustomer(UUID customerId) { return notifications.findByCustomerIdAndReadFalseOrderByCreatedAtDesc(customerId); }
     public Notification markRead(UUID customerId, UUID notificationId) {
         Notification notification = notifications.findById(notificationId).orElseThrow(NotificationNotFoundException::new);
         if (!notification.getCustomerId().equals(customerId)) throw new NotificationNotFoundException();
