@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 import java.util.List;
 import java.util.UUID;
+import com.example.notificationservice.delivery.NotificationDelivery;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -25,6 +26,24 @@ class NotificationServiceTest {
         service.handlePaymentStatusChanged(orderId, "SUCCESS");
 
         verify(notifications).save(any(Notification.class));
+    }
+
+    @Test
+    void deliversARecordedPaymentNotificationThroughTheConfiguredChannel() {
+        UUID orderId = UUID.randomUUID();
+        UUID customerId = UUID.randomUUID();
+        NotificationRepository notifications = mock(NotificationRepository.class);
+        NotificationOrderRepository orders = mock(NotificationOrderRepository.class);
+        PendingPaymentNotificationRepository pending = mock(PendingPaymentNotificationRepository.class);
+        NotificationDelivery delivery = mock(NotificationDelivery.class);
+        when(orders.findById(orderId)).thenReturn(Optional.of(NotificationOrder.create(orderId, customerId)));
+        when(notifications.existsByOrderIdAndType(orderId, NotificationType.PAYMENT_SUCCEEDED)).thenReturn(false);
+        when(notifications.save(any(Notification.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        NotificationService service = new NotificationService(notifications, orders, pending, delivery);
+
+        service.handlePaymentStatusChanged(orderId, "SUCCESS");
+
+        verify(delivery).deliver(any(Notification.class));
     }
 
     @Test
